@@ -3,10 +3,11 @@ import { useState } from "react";
 import axios from "axios";
 import * as z from "zod";
 import Heading from '@/components/Heading';
-import { MessageSquare } from 'lucide-react';
+import { Code, MessageSquare } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import ReactMarkdown from "react-markdown";
 
 import { formSchema } from "./constants";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
@@ -22,7 +23,7 @@ import { BotAvatar } from "@/components/bot-avatar";
 // import { ChatCompletionRequestMessage } from "openai";
 
 
-const ConversationPage = () => {
+const CodePage = () => {
     const router = useRouter();
     
     type Message = {
@@ -52,7 +53,7 @@ const ConversationPage = () => {
 
             const newMessages = [...messages, userMessage];
 
-            const response = await axios.post("/api/conversation", { messages: newMessages, });
+            const response = await axios.post("/api/code", { messages: newMessages, });
 
             setMessages((current) => [...current, userMessage, response.data]);
 
@@ -69,11 +70,11 @@ const ConversationPage = () => {
   return (
     <div>
         <Heading 
-            title='Conversation'
-            description='Our most advanced conversation model.'
-            icon={MessageSquare}
-            iconColor='text-violet-500'
-            bgColor='bg-violet-500/10'
+            title='Code Generation'
+            description='Generate and Develop using desciptive text'
+            icon={Code}
+            iconColor='text-green-700'
+            bgColor='bg-green-700/10'
         />
         
         <div className='px-4 lg:px-8'>
@@ -101,7 +102,7 @@ const ConversationPage = () => {
                                         <Input 
                                             className="border-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent"
                                             disabled={isLoading}
-                                            placeholder="What are some good video ideas for a food content creator?"
+                                            placeholder="Generate a Simple Navbar using React and TailwindCSS"
                                             {...field}
                                         />
 
@@ -132,9 +133,20 @@ const ConversationPage = () => {
                             className={cn("p-8 w-full flex items-start gap-x-8 rounded-lg", message.role === "user" ? "bg-white border border-black/10" : "bg-muted")}
                         >
                             {message.role === "user" ? <UserAvatar /> : <BotAvatar />}
-                            <p className="text-sm">
-                                {message.content}
-                            </p>
+                            <ReactMarkdown components={{
+                                pre: ({node, ...props}) => (
+                                    <div className="overflow-auto w-full my-2 bg-black/10 p-2 rounded-lg">
+                                        <pre {...props} />
+                                    </div>
+                                ),
+                                code: ({node, ...props}) => (
+                                    <div className="overflow-auto w-full my-2 bg-black/10 p-2 rounded-lg">
+                                        <code className="bg-black/10 rounded-lg p-1" {...props} />
+                                    </div>
+                                ),
+                                }} className="text-sm overflow-hidden leading-7">
+                                {message.content || ""}
+                            </ReactMarkdown>
                             
                         </div>
                     ))}
@@ -146,4 +158,4 @@ const ConversationPage = () => {
   )
 }
 
-export default ConversationPage;
+export default CodePage;

@@ -3,7 +3,7 @@ import { useState } from "react";
 import axios from "axios";
 import * as z from "zod";
 import Heading from '@/components/Heading';
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare, Music } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -15,14 +15,12 @@ import { Button } from "@/components/ui/button";
 
 import { Empty } from "@/components/Empty";
 import { Loader } from "@/components/Loader";
-import { cn } from "@/lib/utils";
-import { UserAvatar } from "@/components/user-avatar";
-import { BotAvatar } from "@/components/bot-avatar";
+
 
 // import { ChatCompletionRequestMessage } from "openai";
 
 
-const ConversationPage = () => {
+const VideoPage = () => {
     const router = useRouter();
     
     type Message = {
@@ -30,7 +28,7 @@ const ConversationPage = () => {
         content: string;
     }
     
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [music, setMusic] = useState<string>();
     
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -44,17 +42,11 @@ const ConversationPage = () => {
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         console.log(values)
         try {
-            //message request
-            const userMessage: Message = {
-                role: "user",
-                content: values.prompt,
-            };
+            setMusic(undefined);
 
-            const newMessages = [...messages, userMessage];
+            const response = await axios.post("/api/music", values,);
 
-            const response = await axios.post("/api/conversation", { messages: newMessages, });
-
-            setMessages((current) => [...current, userMessage, response.data]);
+            setMusic(response.data.audio);
 
             form.reset();
 
@@ -69,11 +61,11 @@ const ConversationPage = () => {
   return (
     <div>
         <Heading 
-            title='Conversation'
-            description='Our most advanced conversation model.'
-            icon={MessageSquare}
-            iconColor='text-violet-500'
-            bgColor='bg-violet-500/10'
+            title='Music Generation'
+            description='Turn your prompt into Music'
+            icon={Music}
+            iconColor='text-emerald-00'
+            bgColor='bg-emerald-500/10'
         />
         
         <div className='px-4 lg:px-8'>
@@ -101,7 +93,7 @@ const ConversationPage = () => {
                                         <Input 
                                             className="border-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent"
                                             disabled={isLoading}
-                                            placeholder="What are some good video ideas for a food content creator?"
+                                            placeholder="aggresive jazz piano solo"
                                             {...field}
                                         />
 
@@ -122,23 +114,14 @@ const ConversationPage = () => {
                     </div>
                 )}
                 
-                {messages.length === 0 && !isLoading && (
-                    <Empty label="No Conversation Started" />
+                {!music && !isLoading && (
+                    <Empty label="No Music Generated" />
                 )}
-                <div className="flex flex-col-reverse gap-y-4">
-                    {messages.map((message) => (
-                        <div 
-                            key={message.content}
-                            className={cn("p-8 w-full flex items-start gap-x-8 rounded-lg", message.role === "user" ? "bg-white border border-black/10" : "bg-muted")}
-                        >
-                            {message.role === "user" ? <UserAvatar /> : <BotAvatar />}
-                            <p className="text-sm">
-                                {message.content}
-                            </p>
-                            
-                        </div>
-                    ))}
-                </div>
+                {music && (
+                    <audio controls className="w-full m-8">
+                        <source src={music} />
+                    </audio>
+                )}
             </div>
         </div>
 
@@ -146,4 +129,4 @@ const ConversationPage = () => {
   )
 }
 
-export default ConversationPage;
+export default VideoPage;
