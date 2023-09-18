@@ -6,6 +6,7 @@ import { Montserrat } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname as useNextPathname } from 'next/navigation';
+import FreeCounter from "./FreeCounter";
 
 const montserrat = Montserrat({ 
     weight: "600",
@@ -96,8 +97,11 @@ const Sidebar = ({
             </div>
         </div>
         <FreeCounter apiLimitCount = {apiLimitCount} />
+        
+        
+        
     </div>
-  )
+  );
 }
 
 export default Sidebar
